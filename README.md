@@ -1,1 +1,1 @@
-# CampusSync-Club-Event-Platform
+# CampusSync: Club Event Platform
