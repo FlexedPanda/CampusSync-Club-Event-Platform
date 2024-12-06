@@ -19,6 +19,8 @@ app.use("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
-	console.log(`Server is running on http://localhost:${PORT}`);
+	console.log(
+		`  \x1b[32m➜\x1b[0m  \x1b[1mServer:\x1b[0m \x1b[36m http://localhost:\x1b[1m${PORT}\x1b[0m/\x1b[0m`
+	);
 	connectDB();
 });

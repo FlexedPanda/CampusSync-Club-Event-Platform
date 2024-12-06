@@ -1,1 +1,1 @@
-# BackTrack: Campus Item Tracker
+# CampusSync: Club Event Platform
