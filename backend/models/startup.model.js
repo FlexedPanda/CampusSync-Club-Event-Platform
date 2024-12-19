@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const requestSchema = new mongoose.Schema(
+const startupSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -27,10 +27,27 @@ const requestSchema = new mongoose.Schema(
       },
     ],
 
-    panel: {
+    club: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Panel",
-      required: [true, "Panel Required"],
+      ref: "Club",
+      required: [true, "Club Required"],
+    },
+
+    panel: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Panel",
+      },
+    ],
+
+    eventCost: {
+      type: Number,
+      required: [true, "Cost Required"],
+    },
+
+    capacity: {
+      type: Number,
+      required: [true, "Capacity Required"],
     },
   },
   {
@@ -38,6 +55,6 @@ const requestSchema = new mongoose.Schema(
   }
 );
 
-const Request = mongoose.model("Request", requestSchema);
+const Startup = mongoose.model("Startup", startupSchema);
 
-export default Request;
+export default Startup;

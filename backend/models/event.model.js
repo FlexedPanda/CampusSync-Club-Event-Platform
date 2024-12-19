@@ -24,6 +24,29 @@ const eventSchema = new mongoose.Schema(
 			},
 		],
 
+		club: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Club",
+			required: [true, "Club Required"],
+		},
+
+		panel: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "Panel",
+			},
+		],
+
+		eventCost: {
+			type: Number,
+			required: [true, "Cost Required"],
+		},
+
+		capacity: {
+			type: Number,
+			required: [true, "Capacity Required"],
+		},
+
 		date: {
 			type: Date,
 			required: [true, "Date Required"],
@@ -38,29 +61,6 @@ const eventSchema = new mongoose.Schema(
 			type: Number,
 			required: [true, "Entry Required"],
 		},
-
-		eventCost: {
-			type: Number,
-			required: [true, "Cost Required"],
-		},
-
-		capacity: {
-			type: Number,
-			required: [true, "Capacity Required"],
-		},
-
-		club: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "Club",
-			required: [true, "Club Required"],
-		},
-
-		panel: [
-			{
-				type: mongoose.Schema.Types.ObjectId,
-				ref: "Panel",
-			},
-		],
 
 		fundings: {
 			type: Number,
