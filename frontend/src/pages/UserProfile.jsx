@@ -105,7 +105,7 @@ export default function UserProfile() {
 									</div>
 									<div className="space-y-1">
 										<p className="text-sm text-muted-foreground">Club</p>
-										<p className="font-medium">{userData.club}</p>
+										<p className="font-medium">{userData.club.name}</p>
 									</div>
 								</div>
 							)}

@@ -200,7 +200,7 @@ export const logout = async (req, res) => {
 
 export const profile = async (req, res) => {
 	try {
-		const user = await User.findById(req.user.id).select("-password");
+		const user = await User.findById(req.user.id).populate("club").select("-password");
 		if (!user) {
 			return res.status(400).json({
 				success: false,
