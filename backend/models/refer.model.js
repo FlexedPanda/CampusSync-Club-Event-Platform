@@ -5,6 +5,7 @@ const referSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "Name Required"],
+      unique: [true, "Refer Exists"],
     },
 
     company: {
@@ -23,6 +24,12 @@ const referSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Panel",
       required: [true, "Panel Required"],
+    },
+
+    club: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Club",
+      required: [true, "Club Required"],
     },
 
     phone: {

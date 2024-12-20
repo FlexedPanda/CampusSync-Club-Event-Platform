@@ -6,6 +6,7 @@ const applySchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: [true, "Name Required"],
+      unique: [true, "Request Exists"],
     },
 
     company: {

@@ -13,7 +13,7 @@ const clubSchema = new mongoose.Schema(
 			ref: "Event",
 		},
 
-		panel: [
+		panels: [
 			{
 				type: mongoose.Schema.Types.ObjectId,
 				ref: "Panel",

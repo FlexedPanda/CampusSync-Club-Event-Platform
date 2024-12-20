@@ -5,27 +5,22 @@ const startupSchema = new mongoose.Schema(
     title: {
       type: String,
       required: [true, "Title Required"],
+      unique: [true, "Startup Exists"],
       trim: true,
     },
 
     cover: {
       type: String,
       required: [true, "Cover Required"],
+      unique: [true, "Startup Exists"],
     },
 
     description: {
       type: String,
       required: [true, "Description Required"],
+      unique: [true, "Startup Exists"],
       trim: true,
     },
-
-    speakers: [
-      {
-        type: String,
-        required: [true, "Speaker Required"],
-        trim: true,
-      },
-    ],
 
     club: {
       type: mongoose.Schema.Types.ObjectId,
@@ -33,7 +28,7 @@ const startupSchema = new mongoose.Schema(
       required: [true, "Club Required"],
     },
 
-    panel: [
+    panels: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Panel",

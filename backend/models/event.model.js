@@ -5,24 +5,20 @@ const eventSchema = new mongoose.Schema(
 		title: {
 			type: String,
 			required: [true, "Title Required"],
+			unique: [true, "Event Exists"],
 		},
 
 		cover: {
 			type: String,
 			required: [true, "Cover Required"],
+			unique: [true, "Event Exists"],
 		},
 
 		description: {
 			type: String,
 			required: [true, "Description Required"],
+			unique: [true, "Event Exists"],
 		},
-
-		speakers: [
-			{
-				type: String,
-				required: [true, "Speaker Required"],
-			},
-		],
 
 		club: {
 			type: mongoose.Schema.Types.ObjectId,
@@ -30,7 +26,7 @@ const eventSchema = new mongoose.Schema(
 			required: [true, "Club Required"],
 		},
 
-		panel: [
+		panels: [
 			{
 				type: mongoose.Schema.Types.ObjectId,
 				ref: "Panel",

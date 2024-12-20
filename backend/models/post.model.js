@@ -4,12 +4,14 @@ const postSchema = new mongoose.Schema(
 	{
 		title: { 
       type: String, 
-      required: [true, "Title Required"], 
+      required: [true, "Title Required"],
+      unique: [true, "Post Exists"], 
     },
 
 		content: { 
       type: String, 
       required: [true, "Content Required"], 
+      unique: [true, "Post Exists"],
     },
 
 		author: {
