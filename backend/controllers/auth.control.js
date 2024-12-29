@@ -354,3 +354,99 @@ export const reject = async (req, res) => {
     });
   }
 };
+
+// Get all sponsorship applications
+export const sponsorships = async (req, res) => {
+  try {
+    // Only fetch pending sponsor applications
+    const sponsorships = await Apply.find({}).populate("event");
+    
+    res.status(200).json({
+      success: true,
+      message: "Sponsorships Fetched Successfully",
+      sponsorships,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// Approve a sponsorship application
+export const approveSponsor = async (req, res) => {
+  try {
+    // Find the application
+    const application = await Apply.findById(req.params.id);
+    if (!application) {
+      return res.status(400).json({
+        success: false,
+        message: "Application Not Found",
+      });
+    }
+
+    // Create new sponsor account with role
+    const sponsorData = {
+      name: application.name,
+      email: application.email,
+      phone: application.phone,
+      password: application.password, // Password is already hashed
+      role: "Sponsor",
+      credits: 100000, // Initial credits
+      company: application.company,
+    };
+
+    if (application.event) {
+      sponsorData.sponsored = application.event;
+    }
+
+    // Create the sponsor
+    const sponsor = await Sponsor.create(sponsorData);
+
+    // Delete the application after successful sponsor creation
+    await Apply.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Sponsorship Approved Successfully",
+      sponsor,
+    });
+  } catch (error) {
+    console.error("Sponsor approval error:", error); // Add error logging
+    return res.status(500).json({
+      success: false, 
+      message: "Internal Server Error",
+      error: error.message
+    });
+  }
+};
+
+// Reject a sponsorship application
+export const rejectSponsor = async (req, res) => {
+  try {
+    const application = await Apply.findById(req.params.id);
+    if (!application) {
+      return res.status(400).json({
+        success: false,
+        message: "Application Not Found",
+      });
+    }
+
+    // Delete the rejected application
+    await Apply.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Sponsorship Rejected Successfully",
+      application,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};

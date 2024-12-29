@@ -6,27 +6,24 @@ const applySchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: [true, "Name Required"],
-      unique: [true, "Request Exists"],
     },
 
     company: {
-			type: String,
+      type: String,
       trim: true,
-			required: [true, "Company Required"],
-			unique: [true, "Sponsor Exists"],
-		},
+      required: [true, "Company Required"],
+    },
 
     event: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Event",
-      required: [true, "Event Required"],
+      required: false,
     },
 
     phone: {
       type: String,
       trim: true,
       required: [true, "Phone Required"],
-      unique: [true, "Phone Exists"],
       validate: {
         validator: (v) => {
           return /^01[3-9]\d{8}$/.test(v);
@@ -40,7 +37,6 @@ const applySchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       required: [true, "Email Required"],
-      unique: [true, "Email Exists"],
       validate: {
         validator: (v) => {
           return /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/.test(v);
