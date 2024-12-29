@@ -263,3 +263,91 @@ export const events = async (req, res) => {
 		});
 	}
 };
+
+export const registrations = async (req, res) => {
+  try {
+    const registrations = await Register.find({}).populate("club");
+    res.status(200).json({
+      success: true,
+      message: "Registrations Fetched Successfully",
+      registrations,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error", 
+      error: error.message,
+    });
+  }
+};
+
+export const approve = async (req, res) => {
+  try {
+    const registration = await Register.findById(req.params.id);
+    if (!registration) {
+      return res.status(400).json({
+        success: false,
+        message: "Registration Not Found",
+      });
+    }
+
+    const user = registration.club 
+      ? new Panel({
+          name: registration.name,
+          phone: registration.phone,
+          email: registration.email,
+          password: registration.password,
+          club: registration.club,
+          designation: "Member",
+          credits: 1000,
+        })
+      : new Guest({
+          name: registration.name,
+          phone: registration.phone,
+          email: registration.email,
+          password: registration.password,
+          credits: 1000,
+        });
+
+    await user.save();
+    await Register.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Registration Approved Successfully",
+      registration,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message, 
+    });
+  }
+};
+
+export const reject = async (req, res) => {
+  try {
+    const registration = await Register.findById(req.params.id);
+    if (!registration) {
+      return res.status(400).json({
+        success: false,
+        message: "Registration Not Found",
+      });
+    }
+
+    await Register.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Registration Rejected Successfully", 
+      registration,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
