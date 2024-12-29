@@ -4,10 +4,12 @@ import jwt from "jsonwebtoken";
 import Club from "../models/club.model.js";
 import Register from "../models/register.model.js";
 import Guest from "../models/guest.model.js";
+import Panel from "../models/panel.model.js";
 import Apply from "../models/apply.model.js";
 import Sponsor from "../models/sponsor.model.js";
 import User from "../models/user.model.js";
 import Event from "../models/event.model.js";
+
 
 export const login = async (req, res) => {
 	const { email, password } = req.body;
@@ -291,37 +293,38 @@ export const approve = async (req, res) => {
       });
     }
 
-    const user = registration.club 
-      ? new Panel({
-          name: registration.name,
-          phone: registration.phone,
-          email: registration.email,
-          password: registration.password,
-          club: registration.club,
-          designation: "Member",
-          credits: 1000,
-        })
-      : new Guest({
-          name: registration.name,
-          phone: registration.phone,
-          email: registration.email,
-          password: registration.password,
-          credits: 1000,
-        });
+    // Create base user data
+    const userData = {
+      name: registration.name,
+      phone: registration.phone,
+      email: registration.email,
+      password: registration.password, // Password is already hashed
+      credits: 1000
+    };
 
-    await user.save();
+    // Create either Panel or Guest based on club existence
+    const user = registration.club 
+      ? await Panel.create({
+          ...userData,
+          club: registration.club,
+          designation: "Member"
+        })
+      : await Guest.create(userData);
+
+    // Delete registration after successful user creation
     await Register.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
-      success: true,
+      success: true, 
       message: "Registration Approved Successfully",
       registration,
     });
   } catch (error) {
+    console.error('Registration approval error:', error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
-      error: error.message, 
+      error: error.message
     });
   }
 };
