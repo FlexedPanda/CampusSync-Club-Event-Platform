@@ -1,7 +1,7 @@
 import express from "express";
 
 import { token } from "../middlewares/token.middleware.js";
-import { login, clubs, events, register, logout, sponsor, profile, access, registrations, approve, reject, sponsorships, approveSponsor, rejectSponsor } from "../controllers/auth.control.js";
+import { login, clubs, events, register, logout, sponsor, profile, access, registrations, approve, reject, sponsorships, approveSponsor, rejectSponsor, getProfileRequests, requestProfileEdit, approveProfileEdit, rejectProfileEdit } from "../controllers/auth.control.js";
 
 const router = express.Router();
 
@@ -25,5 +25,11 @@ router.post("/sponsor/approve/:id", token, approveSponsor);
 
 // Reject a sponsorship  
 router.delete("/sponsor/reject/:id", token, rejectSponsor);
+
+// Add these routes
+router.get("/profile/requests", token, getProfileRequests);  
+router.post("/profile/edit", token, requestProfileEdit);
+router.post("/profile/approve/:id", token, approveProfileEdit);
+router.delete("/profile/reject/:id", token, rejectProfileEdit);
 
 export default router;

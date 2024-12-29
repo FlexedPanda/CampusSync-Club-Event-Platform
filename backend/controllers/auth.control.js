@@ -9,7 +9,7 @@ import Apply from "../models/apply.model.js";
 import Sponsor from "../models/sponsor.model.js";
 import User from "../models/user.model.js";
 import Event from "../models/event.model.js";
-
+import Edit from "../models/edit.model.js";
 
 export const login = async (req, res) => {
 	const { email, password } = req.body;
@@ -441,6 +441,128 @@ export const rejectSponsor = async (req, res) => {
       success: true,
       message: "Sponsorship Rejected Successfully",
       application,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// Get all pending profile edit requests
+export const getProfileRequests = async (req, res) => {
+  try {
+    const requests = await Edit.find({});
+    
+    res.status(200).json({
+      success: true,
+      message: "Edit Requests Fetched Successfully",
+      requests,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// Submit a profile edit request
+export const requestProfileEdit = async (req, res) => {
+  try {
+    const { newName } = req.body;
+    
+    // Check if user already has a pending request
+    const existingRequest = await Edit.findOne({ userId: req.user._id });
+    if (existingRequest) {
+      return res.status(400).json({
+        success: false,
+        message: "Edit Request Already Pending",
+      });
+    }
+
+    const editRequest = await Edit.create({
+      userId: req.user._id,
+      currentName: req.user.name,
+      newName,
+      email: req.user.email
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Edit Request Submitted Successfully",
+      editRequest,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// Approve a profile edit request
+export const approveProfileEdit = async (req, res) => {
+  try {
+    const editRequest = await Edit.findById(req.params.id);
+    if (!editRequest) {
+      return res.status(400).json({
+        success: false,
+        message: "Edit Request Not Found",
+      });
+    }
+
+    // Update user's name
+    const user = await User.findById(editRequest.userId);
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User Not Found",
+      });
+    }
+
+    user.name = editRequest.newName;
+    await user.save();
+
+    // Delete the edit request
+    await Edit.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Profile Edit Request Approved Successfully",
+      editRequest,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// Reject a profile edit request
+export const rejectProfileEdit = async (req, res) => {
+  try {
+    const editRequest = await Edit.findById(req.params.id);
+    if (!editRequest) {
+      return res.status(400).json({
+        success: false,
+        message: "Edit Request Not Found",
+      });
+    }
+
+    // Delete the edit request
+    await Edit.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Profile Edit Request Rejected Successfully",
+      editRequest,
     });
   } catch (error) {
     return res.status(500).json({
