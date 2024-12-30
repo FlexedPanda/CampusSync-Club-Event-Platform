@@ -9,6 +9,7 @@ import connectDB from "./config/db.config.js";
 import authRouter from "./routers/auth.route.js";
 import eventRouter from "./routers/event.route.js";
 import fundRouter from "./routers/fund.route.js";
+import announcementRoutes from "./routers/announcement.routes.js";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use("/api/uploads", express.static(path.join(__dirname, 'uploads')));
 app.use("/api/auth", authRouter);
 app.use("/api/event", eventRouter);
 app.use("/api/fund", fundRouter);
+app.use("/api/announcement", announcementRoutes);
 
 app.use("/", (req, res) => res.send("Backend API Running..."));
 
