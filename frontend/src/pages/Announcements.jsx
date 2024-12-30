@@ -18,7 +18,11 @@ export default function Announcements() {
     content: "",
     eventId: ""
   });
+  
   const type = localStorage.getItem("type");
+  const email = localStorage.getItem("email");
+  const isPanel = email?.toLowerCase().startsWith('panel');
+  const canCreateAnnouncement = type === "Panel" || type === "Officer";
 
   useEffect(() => {
     fetchAnnouncements();
@@ -99,7 +103,7 @@ export default function Announcements() {
 
   return (
     <main className="p-6">
-      {(type === "Panel" || type === "Officer") && (
+      {canCreateAnnouncement && (
         <div className="mb-6">
           <Button 
             onClick={() => setShowForm(!showForm)}

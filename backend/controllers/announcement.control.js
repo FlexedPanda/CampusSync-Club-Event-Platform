@@ -3,16 +3,17 @@ import Announcement from "../models/announcement.model.js";
 
 export const create = async (req, res) => {
   try {
-    console.log("User role:", req.user.role);
-    console.log("User club:", req.user.club);
-
     const { title, content, eventId } = req.body;
     
-    // Require eventId for Panel users
-    if (req.user.role === "Panel" && !eventId) {
-      return res.status(400).json({
+    // Check if user is authorized to create announcements
+    const isOfficer = req.user.role === "Officer";
+    // Check if user is a panel member with designation other than "Member"
+    const isPanelMember = req.user.role === "Panel" && req.user.designation !== "Member";
+    
+    if (!isPanelMember && !isOfficer) {
+      return res.status(403).json({
         success: false,
-        message: "Event selection is required for panel members"
+        message: "Only club panel officials and officers can create announcements"
       });
     }
 
@@ -31,8 +32,8 @@ export const create = async (req, res) => {
         });
       }
 
-      // Compare club IDs correctly - use _id from populated user.club object
-      if (req.user.role === "Panel") {
+      // Check if panel member has permission for this event's club
+      if (isPanelMember) {
         const userClubId = req.user.club._id.toString();
         const eventClubId = event.club.toString();
 
@@ -46,7 +47,7 @@ export const create = async (req, res) => {
 
       announcementData.event = eventId;
       announcementData.club = event.club;
-    } else if (req.user.role === "Panel") {
+    } else if (isPanelMember) {
       announcementData.club = req.user.club._id;
     }
 
@@ -69,14 +70,7 @@ export const create = async (req, res) => {
 
 export const getAll = async (req, res) => {
   try {
-    let query = {};
-    
-    // If panel, only show their club's announcements
-    if (req.user.role === "Panel") {
-      query.club = req.user.club._id;
-    }
-
-    const announcements = await Announcement.find(query)
+    const announcements = await Announcement.find()
       .populate("creator", "name")
       .populate("club", "name")
       .populate("event", "title")
