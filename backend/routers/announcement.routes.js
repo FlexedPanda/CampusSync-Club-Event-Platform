@@ -13,4 +13,6 @@ router.post("/", token, announcement.create);
 // Only allow panels and officers to get available events
 router.get("/events", token, announcement.getAvailableEvents);
 
+router.delete("/:id", token, announcement.deleteAnnouncement);
+
 export default router;

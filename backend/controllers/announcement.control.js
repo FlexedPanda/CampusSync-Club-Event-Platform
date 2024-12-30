@@ -117,3 +117,37 @@ export const getAvailableEvents = async (req, res) => {
     });
   }
 };
+
+export const deleteAnnouncement = async (req, res) => {
+  try {
+    // Only officers can delete announcements
+    if (req.user.role !== "Officer") {
+      return res.status(403).json({
+        success: false,
+        message: "Only officers can delete announcements"
+      });
+    }
+
+    const announcement = await Announcement.findById(req.params.id);
+    if (!announcement) {
+      return res.status(404).json({
+        success: false,
+        message: "Announcement not found"
+      });
+    }
+
+    await Announcement.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Announcement deleted successfully"
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete announcement",
+      error: error.message
+    });
+  }
+};

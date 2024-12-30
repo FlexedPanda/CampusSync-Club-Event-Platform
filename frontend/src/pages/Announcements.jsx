@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ScrollText, LoaderCircle } from "lucide-react";
+import { ScrollText, LoaderCircle, Trash2 } from "lucide-react"; // Add Trash2 import
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,6 +93,25 @@ export default function Announcements() {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      const res = await axios.delete(`/announcement/${id}`, {
+        headers: {
+          token: localStorage.getItem("token"),
+          type: localStorage.getItem("type")
+        }
+      });
+
+      if (res.data.success) {
+        toast.success("Announcement deleted successfully");
+        // Remove the deleted announcement from state
+        setAnnouncements(announcements.filter(a => a._id !== id));
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete announcement");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[600px]">
@@ -158,8 +177,18 @@ export default function Announcements() {
       <div className="grid gap-6">
         {announcements.map(announcement => (
           <Card key={announcement._id}>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{announcement.title}</CardTitle>
+              {type === "Officer" && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(announcement._id)}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <p>{announcement.content}</p>
