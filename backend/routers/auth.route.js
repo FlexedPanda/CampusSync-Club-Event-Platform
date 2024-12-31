@@ -1,35 +1,29 @@
 import express from "express";
-
 import { token } from "../middlewares/token.middleware.js";
-import { login, clubs, events, register, logout, sponsor, profile, access, registrations, approve, reject, sponsorships, approveSponsor, rejectSponsor, getProfileRequests, requestProfileEdit, approveProfileEdit, rejectProfileEdit } from "../controllers/auth.control.js";
+import { 
+  login, 
+  clubs, 
+  register, 
+  logout, 
+  profile, 
+  access,
+  getPendingRegistrations, 
+  approveRegistration, 
+  rejectRegistration 
+} from "../controllers/auth.control.js";
 
 const router = express.Router();
 
 router.get("/clubs", clubs);
-router.get("/events", events);
 router.post("/login", login);
 router.post("/register", register);
-router.post("/sponsor", sponsor);
 router.post("/logout", logout);
 router.get("/profile", token, profile);
 router.get("/protect", token, access);
-router.get("/registrations", token, registrations);
-router.post("/registrations/:id", token, approve);
-router.delete("/registrations/:id", token, reject);
 
-// Get all sponsorship applications  
-router.get("/sponsorships", token, sponsorships);
-
-// Approve a sponsorship
-router.post("/sponsor/approve/:id", token, approveSponsor);
-
-// Reject a sponsorship  
-router.delete("/sponsor/reject/:id", token, rejectSponsor);
-
-// Add these routes
-router.get("/profile/requests", token, getProfileRequests);  
-router.post("/profile/edit", token, requestProfileEdit);
-router.post("/profile/approve/:id", token, approveProfileEdit);
-router.delete("/profile/reject/:id", token, rejectProfileEdit);
+// Update registration routes to be accessible by panel members
+router.get("/pending-registrations", token, getPendingRegistrations);
+router.post("/approve-registration/:id", token, approveRegistration);
+router.delete("/reject-registration/:id", token, rejectRegistration);
 
 export default router;

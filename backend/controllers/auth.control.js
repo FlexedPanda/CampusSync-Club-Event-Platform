@@ -62,63 +62,59 @@ export const login = async (req, res) => {
 	}
 };
 
+// backend/controllers/auth.control.js
+
 export const register = async (req, res) => {
-	const { name, club, phone, email, password } = req.body;
+  const { name, club, phone, email, password } = req.body;
 
-	try {
-		const guest = await Guest.findOne({ email });
-		if (guest) {
-			return res.status(400).json({
-				success: false,
-				message: "Guest Already Exists",
-			});
-		}
+  try {
+    const user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({
+        success: false,
+        message: "User Already Exists",
+      });
+    }
 
-		const request = await Register.findOne({ email });
-		if (request) {
-			return res.status(400).json({
-				success: false,
-				message: "Request Already Sent",
-			});
-		}
+    const request = await Register.findOne({ email });
+    if (request) {
+      return res.status(400).json({
+        success: false,
+        message: "Request Already Sent", 
+      });
+    }
 
-		if (password.length < 4) {
-			throw new Error("Password Must Be At Least 4 Characters Long");
-		}
-		const hashedPassword = await bcryptjs.hash(password, 12);
+    if (password.length < 4) {
+      throw new Error("Password Must Be At Least 4 Characters Long");
+    }
 
-		const register = new Register({
-			name,
-			phone,
-			email,
-			password: hashedPassword,
-		});
+    // Hash password
+    const hashedPassword = await bcryptjs.hash(password, 12);
 
-		if (club) {
-			const clubObj = await Club.findById(club);
-			if (!clubObj) {
-				return res.status(400).json({
-					success: false,
-					message: "Invalid Club Selected",
-				});
-			}
-			register.club = clubObj._id;
-		}
+    // Create registration request with club reference if provided
+    const register = new Register({
+      name,
+      phone,
+      email,
+      password: hashedPassword,
+      club: club || null // Make club optional
+    });
 
-		await register.save();
+    await register.save();
 
-		return res.status(201).json({
-			success: true,
-			message: "Request Sent Successfully",
-			redirect: "/app/home/login",
-		});
-	} catch (error) {
-		return res.status(500).json({
-			success: false,
-			message: "Internal Server Error",
-			error: error.message,
-		});
-	}
+    return res.status(201).json({
+      success: true,
+      message: "Registration Request Sent Successfully",
+      redirect: "/app/home/login",
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
 };
 
 export const sponsor = async (req, res) => {
@@ -288,42 +284,35 @@ export const approve = async (req, res) => {
     const registration = await Register.findById(req.params.id);
     if (!registration) {
       return res.status(400).json({
-        success: false,
+        success: false, 
         message: "Registration Not Found",
       });
     }
 
-    // Create base user data
-    const userData = {
+    // Create user as Guest by default
+    const user = await Guest.create({
       name: registration.name,
       phone: registration.phone,
       email: registration.email,
-      password: registration.password, // Password is already hashed
+      password: registration.password,
+      role: "Guest",
       credits: 1000
-    };
-
-    // Create either Panel or Guest based on club existence
-    const user = registration.club 
-      ? await Panel.create({
-          ...userData,
-          club: registration.club,
-          designation: "Member"
-        })
-      : await Guest.create(userData);
+    });
 
     // Delete registration after successful user creation
     await Register.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
-      success: true, 
+      success: true,
       message: "Registration Approved Successfully",
-      registration,
+      user,
     });
+
   } catch (error) {
     console.error('Registration approval error:', error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: "Internal Server Error", 
       error: error.message
     });
   }
@@ -569,6 +558,129 @@ export const rejectProfileEdit = async (req, res) => {
       success: false,
       message: "Internal Server Error",
       error: error.message,
+    });
+  }
+};
+
+// Get pending registrations for panel members
+export const getPendingRegistrations = async (req, res) => {
+  try {
+    // Check if user is panel member
+    if (req.user.role !== "Panel") {
+      return res.status(403).json({
+        success: false,
+        message: "Only panel members can view registrations"
+      });
+    }
+
+    // Get registrations for the panel member's club
+    const registrations = await Register.find({ 
+      club: req.user.club 
+    }).populate("club");
+    
+    res.status(200).json({
+      success: true,
+      registrations
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch registrations",
+      error: error.message
+    });
+  }
+};
+
+export const approveRegistration = async (req, res) => {
+  try {
+    // Check if user is panel member
+    if (req.user.role !== "Panel") {
+      return res.status(403).json({
+        success: false,
+        message: "Only panel members can approve registrations"
+      });
+    }
+
+    const registration = await Register.findById(req.params.id);
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        message: "Registration not found"
+      });
+    }
+
+    // Check if panel member has permission for this club
+    if (registration.club.toString() !== req.user.club.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only approve registrations for your club"
+      });
+    }
+
+    // Create new guest account
+    const guest = await Guest.create({
+      name: registration.name,
+      phone: registration.phone,
+      email: registration.email,
+      password: registration.password,
+      role: "Guest",
+      credits: 1000
+    });
+
+    await Register.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Registration approved successfully",
+      guest
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message
+    });
+  }
+};
+
+export const rejectRegistration = async (req, res) => {
+  try {
+    // Check if user is panel member
+    if (req.user.role !== "Panel") {
+      return res.status(403).json({
+        success: false,
+        message: "Only panel members can reject registrations"
+      });
+    }
+
+    const registration = await Register.findById(req.params.id);
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        message: "Registration not found"
+      });
+    }
+
+    // Check if panel member has permission for this club
+    if (registration.club.toString() !== req.user.club.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only reject registrations for your club"
+      });
+    }
+
+    // Delete the registration
+    await Register.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Registration rejected successfully"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message
     });
   }
 };

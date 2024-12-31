@@ -168,11 +168,6 @@ const OfficerNavLinks = [
 		icon: LayoutDashboard,
 	},
 	{
-		title: "Registrations",
-		path: "/app/officer/dashboard/registrations",
-		icon: UserRoundPen,
-	},
-	{
 		title: "Sponsorships",
 		path: "/app/officer/dashboard/sponsorships",
 		icon: ClipboardPenLine,
@@ -225,3 +220,47 @@ export function Navbar() {
 		</Sidebar>
 	);
 }
+
+// ... other exports ...
+
+export const rejectRegistration = async (req, res) => {
+  try {
+    // Check if user is panel member
+    if (req.user.role !== "Panel") {
+      return res.status(403).json({
+        success: false,
+        message: "Only panel members can reject registrations"
+      });
+    }
+
+    const registration = await Register.findById(req.params.id);
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        message: "Registration not found"
+      });
+    }
+
+    // Check if panel member has permission for this club
+    if (registration.club.toString() !== req.user.club.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only reject registrations for your club"
+      });
+    }
+
+    // Delete the registration
+    await Register.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Registration rejected successfully"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message
+    });
+  }
+};
