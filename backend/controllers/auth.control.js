@@ -65,7 +65,7 @@ export const login = async (req, res) => {
 // backend/controllers/auth.control.js
 
 export const register = async (req, res) => {
-  const { name, club, phone, email, password } = req.body;
+  const { name, phone, email, password } = req.body;
 
   try {
     const user = await User.findOne({ email });
@@ -88,16 +88,15 @@ export const register = async (req, res) => {
       throw new Error("Password Must Be At Least 4 Characters Long");
     }
 
-    // Hash password
     const hashedPassword = await bcryptjs.hash(password, 12);
 
-    // Create registration request with club reference if provided
+    // Create registration request as Guest (club is null)
     const register = new Register({
       name,
       phone,
       email,
       password: hashedPassword,
-      club: club || null // Make club optional
+      club: null // Always create as guest
     });
 
     await register.save();
@@ -573,10 +572,10 @@ export const getPendingRegistrations = async (req, res) => {
       });
     }
 
-    // Get registrations for the panel member's club
+    // Get all guest registrations (where club is null)
     const registrations = await Register.find({ 
-      club: req.user.club 
-    }).populate("club");
+      club: null // Only get guest registrations
+    });
     
     res.status(200).json({
       success: true,
@@ -609,11 +608,11 @@ export const approveRegistration = async (req, res) => {
       });
     }
 
-    // Check if panel member has permission for this club
-    if (registration.club.toString() !== req.user.club.toString()) {
+    // Only allow approving guest registrations (where club is null)
+    if (registration.club) {
       return res.status(403).json({
         success: false,
-        message: "You can only approve registrations for your club"
+        message: "You can only approve guest registrations"
       });
     }
 
@@ -661,11 +660,11 @@ export const rejectRegistration = async (req, res) => {
       });
     }
 
-    // Check if panel member has permission for this club
-    if (registration.club.toString() !== req.user.club.toString()) {
+    // Only allow rejecting guest registrations (where club is null)
+    if (registration.club) {
       return res.status(403).json({
         success: false,
-        message: "You can only reject registrations for your club"
+        message: "You can only reject guest registrations"
       });
     }
 
