@@ -268,7 +268,7 @@ export const launch = async (req, res) => {
 			});
 		}
 
-		entrt = Number(req.body.entry);
+		const entry = Number(req.body.entry);
 		if (entry <= 0) {
 			return res.status(400).json({
 				success: false,
