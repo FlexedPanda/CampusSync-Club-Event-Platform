@@ -5,7 +5,6 @@ import User from "../models/user.model.js";
 import Officer from "../models/officer.model.js";
 import Sponsor from "../models/sponsor.model.js";
 import Offer from "../models/offer.model.js";
-import e from "express";
 
 export const provide = async (req, res) => {
   try {
