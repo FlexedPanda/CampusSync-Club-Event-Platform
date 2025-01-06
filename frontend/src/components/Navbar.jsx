@@ -102,11 +102,6 @@ const PanelNavLinks = [
 		icon: Stamp,
 	},
 	{
-		title: "Create Post",
-		path: "/app/panel/dashboard/post",
-		icon: SquarePen,
-	},
-	{
 		title: "Request Event",
 		path: "/app/panel/dashboard/request",
 		icon: CircleFadingPlus,
@@ -115,11 +110,6 @@ const PanelNavLinks = [
 		title: "Participants",
 		path: "/app/panel/dashboard/participants",
 		icon: UsersRound,
-	},
-	{
-		title: "Applications",
-		path: "/app/panel/dashboard/applications",
-		icon: ClipboardPenLine,
 	},
 	{
 		title: "Joined Events",
